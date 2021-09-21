@@ -1,16 +1,12 @@
-## 🤖🧰 Web Scraping | [Recanto das Letras](https://www.recantodasletras.com.br/) 📓✒
+## 🧰 Processamento de Linguagem Natural 📓✒
 ### [Read in English here](README-en.md).
 ![version](https://img.shields.io/badge/relise-v1.0.0-important)
 
-Projeto **Web Scraping** **Python** para o site Recanto das Letras, rede social de compartilhamento de contos, poesias e textos em geral.
-
-_**Web Scraping** **Python** project for the Recanto das Letras website, a social network for sharing stories, poetry and texts in general._
+Projeto de análise de textos. Repositório destinado a organizar ferramentas e *** disciplina de Processamento de Linguagem Natural da Pós da PUC Minas.
 
 [![License: CC-BY-NC-SA](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)
 
-[![Psycopg](https://img.shields.io/badge/lib-Psycopg-yellowgreen)](https://www.psycopg.org/) [![SQLalchemy](https://img.shields.io/badge/lib-SQLalchemy-darkred)](https://www.sqlalchemy.org/) [![Selenium](https://img.shields.io/badge/lib-Selenium-darkgreen)](https://www.selenium.dev/documentation/en/selenium_installation/installing_selenium_libraries/) [![Pandas](https://img.shields.io/badge/lib-Pandas-white)](https://pandas.pydata.org/) [![NumPy](https://img.shields.io/badge/lib-NumPy-darkblue)](https://numpy.org/)
-
-![WebScraping](images/web_scraping.gif)
+[![NLTK](https://img.shields.io/badge/lib-NLTK-darkorange)](https://www.nltk.org/) [![Psycopg](https://img.shields.io/badge/lib-Psycopg-yellowgreen)](https://www.psycopg.org/) [![SQLalchemy](https://img.shields.io/badge/lib-SQLalchemy-darkred)](https://www.sqlalchemy.org/) [![Pandas](https://img.shields.io/badge/lib-Pandas-white)](https://pandas.pydata.org/) [![NumPy](https://img.shields.io/badge/lib-NumPy-darkblue)](https://numpy.org/)
 
 ## Recursos
 

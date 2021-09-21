@@ -1,4 +1,4 @@
-from getpoetry.helpers import get_env, print_message
+from nlp.helpers import get_env, print_message  # type: ignore
 from dataclasses import dataclass
 from sqlalchemy import (  # type: ignore
     Column,
