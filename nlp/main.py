@@ -1,12 +1,12 @@
 import re
 from typing import List, Tuple, Any
-import pandas as pd
+import pandas as pd  # type: ignore
 import numpy as np
-from nltk.tokenize.casual import casual_tokenize
-from nltk.util import ngrams
-from nltk.stem.porter import PorterStemmer
-from nltk.stem import WordNetLemmatizer
-import nltk
+from nltk.tokenize.casual import casual_tokenize  # type: ignore
+from nltk.util import ngrams  # type: ignore
+from nltk.stem.porter import PorterStemmer  # type: ignore
+from nltk.stem import WordNetLemmatizer  # type: ignore
+import nltk  # type: ignore
 
 
 class NLP:
@@ -17,7 +17,7 @@ class NLP:
         self.stemmer = PorterStemmer()
         self.lemmatizer = WordNetLemmatizer()
 
-    def analize(self, sentences):
+    def analize(self, sentences: str):
         sentences = self.strip_pontuation(sentences).lower()
 
         onehot_df = self.tolkenizator(sentences)
@@ -105,7 +105,7 @@ class NLP:
 
 
 if __name__ == "__main__":
-    sentences = """Bolsonaro ignora crise energética,
+    sentence = """Bolsonaro ignora crise energética,
         infla números de manifestação bolsonarista,
         diz que desmatamento ilegal da Amazônia teve
         queda de mais de 30% e ataca governadores,
@@ -114,4 +114,4 @@ if __name__ == "__main__":
         https://bit.ly/2XDrV0M"""
 
     nlp = NLP()
-    nlp.analize(sentences)
+    nlp.analize(sentence)

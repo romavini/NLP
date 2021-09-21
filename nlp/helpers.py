@@ -1,9 +1,10 @@
 import traceback
 import os
+from typing import Callable, Optional
 from dotenv import load_dotenv
 
 
-def get_env(info_name):
+def get_env(info_name: str) -> Optional[str]:
     """Return an information stored in dotenv"""
     load_dotenv()
     return os.getenv(info_name)
@@ -41,7 +42,7 @@ def print_message(status: str, text: str, message_type: str = "n"):
     )
 
 
-def exception_handler(func):
+def exception_handler(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         res = None
         exception_raised = 1
