@@ -79,8 +79,13 @@ def stemming(text: str) -> str:
 
 if __name__ == "__main__":
     sentence = "Lorem ipsum dolor sit amet,"
-    sentences = """Passei a vida ouvindo q precisava acordar mais cedo, q dormir tarde faz mal, q de manhã temos mais energia.
-        Depois desses 2 meses ridículos [e somando o ensino médio e um emprego matutino q tive], posso dizer: NADA DE BOM acontece antes das 9h da manhã."""
+    sentences = """Bolsonaro ignora crise energética,
+        infla números de manifestação bolsonarista,
+        diz que desmatamento ilegal da Amazônia teve
+        queda de mais de 30%% e ataca governadores,
+        prefeitos e imprensa brasileira em defesa de
+        tratamento precoce contra Covid-19 na ONU:
+        https://bit.ly/2XDrV0M"""
 
     sentences = strip_pontuation(sentences).lower()
     # sentences = stemming(sentences)
