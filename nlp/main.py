@@ -1,3 +1,4 @@
+from nlp.psql.database import read_db
 import re
 from typing import List, Tuple, Any
 import pandas as pd  # type: ignore
@@ -5,7 +6,7 @@ import numpy as np
 from nltk.tokenize.casual import casual_tokenize  # type: ignore
 from nltk.util import ngrams  # type: ignore
 from nltk.stem.porter import PorterStemmer  # type: ignore
-from nltk.stem import WordNetLemmatizer  # type: ignore
+import spacy
 import nltk  # type: ignore
 
 
@@ -15,31 +16,40 @@ class NLP:
         self.stop_words = nltk.corpus.stopwords.words("portuguese")
 
         self.stemmer = PorterStemmer()
-        self.lemmatizer = WordNetLemmatizer()
+        self.scy = spacy.load("pt_core_news_sm")
 
     def analize(self, sentences: str):
         sentences = self.strip_pontuation(sentences).lower()
 
         onehot_df = self.tolkenizator(sentences)
-        print(onehot_df)
+        print(f"{onehot_df = }")
 
         bow_df = self.bow(sentences)
-        print(bow_df.columns)
-        print(bow_df)
+        print(f"{bow_df.columns = }")
+        print(f"{bow_df = }")
 
         tokens = self.do_ngrams(
             self.casual_token(sentences, reduce_len=True, strip_handles=True)
         )
-        print(tokens)
+        print(f"{tokens = }")
 
         bow_df_ngrams = self.bow(sentences, 2)
 
-        print(f"{self.scalar_prod(bow_df_ngrams)=}")
-        print(f"{self.scalar_prod(bow_df)=}")
+        print(f"{self.scalar_prod(bow_df_ngrams) = }")
+        print(f"{self.scalar_prod(bow_df) = }")
 
-    def tolkenizator(
-        self, sentence: str, remove_stop_words: bool = True
-    ) -> pd.DataFrame:
+        self.scalar_matrix(bow_df)
+
+        tokens_scy, doc = self.grammatic(sentences)
+        tokens_lemma = self.lemma(tokens_scy)
+        ent = self.entities(doc)
+
+        print(f"{tokens_lemma = }")
+        print(f"{ent = }")
+
+        return bow_df
+
+    def tolkenizator(self, sentence: str, remove_stop_words: bool = True) -> pd.DataFrame:
         token_sentence = str.split(sentence)
         if remove_stop_words:
             token_sentence = [
@@ -79,12 +89,28 @@ class NLP:
 
         return pd.DataFrame.from_records(corpus).fillna(0).astype(int).T
 
+    def grammatic(self, sentence: str) -> Tuple[Any, Any]:
+        doc = self.scy(sentence)
+
+        return [token for token in doc], doc
+
+    def lemma(self, tokens: List[Any]) -> List[Any]:
+        return [
+            (token.lemma_, token.pos_)
+            if token.pos_ == "VERB"
+            else (token.orth_, token.pos_)
+            for token in tokens
+        ]
+
+    def entities(self, doc: spacy.tokens.doc.Doc) -> List[Any]:
+        print(f"{type(doc) = }")
+
+        return [(entity, entity.label_) for entity in doc.ents]
+
     def casual_token(self, sentence: str, *args, **kwargs) -> List[str]:
         return casual_tokenize(sentence, *args, **kwargs)
 
-    def strip_pontuation(
-        self, text: str, pattern_to_strip: str = r"([-.,;!?])+"
-    ) -> str:
+    def strip_pontuation(self, text: str, pattern_to_strip: str = r"([-.,;!?])+") -> str:
         pattern = re.compile(pattern_to_strip)
         return "".join(
             [tok for tok in pattern.split(text) if tok not in pattern_to_strip]
@@ -100,18 +126,18 @@ class NLP:
 
         return ocorr, prod
 
+    def scalar_matrix(self, sentences: pd.DataFrame) -> pd.DataFrame:
+        # TODO
+        pass
+
     def stemming(self, text: str) -> str:
         return " ".join([self.stemmer.stem(w) for w in text.split()])
 
 
 if __name__ == "__main__":
-    sentence = """Bolsonaro ignora crise energética,
-        infla números de manifestação bolsonarista,
-        diz que desmatamento ilegal da Amazônia teve
-        queda de mais de 30% e ataca governadores,
-        prefeitos e imprensa brasileira em defesa de
-        tratamento precoce contra Covid-19 na ONU:
-        https://bit.ly/2XDrV0M"""
+    df = read_db("poems")
+
+    sentence = "\n".join(df.loc[df["category"] == "Poesias › Amor"]["text"].to_list())
 
     nlp = NLP()
-    nlp.analize(sentence)
+    bow_df = nlp.analize(sentence)
