@@ -1,11 +1,16 @@
+from nltk import tokenize
 from nlp.psql.database import read_db
 import re
-from typing import List, Tuple, Any
+import copy
+from typing import Dict, List, Tuple, Any
 import pandas as pd  # type: ignore
 import numpy as np
 from nltk.tokenize.casual import casual_tokenize  # type: ignore
+from nltk.tokenize import TreebankWordTokenizer  # type: ignore
 from nltk.util import ngrams  # type: ignore
 from nltk.stem.porter import PorterStemmer  # type: ignore
+from collections import Counter
+from collections import OrderedDict
 import spacy
 import nltk  # type: ignore
 
@@ -16,38 +21,78 @@ class NLP:
         self.stop_words = nltk.corpus.stopwords.words("portuguese")
 
         self.stemmer = PorterStemmer()
-        self.scy = spacy.load("pt_core_news_sm")
+        self.spacy_mode_pt = spacy.load("pt_core_news_sm")
+
+    def vectorize_many(self, docs):
+        tokenizer = TreebankWordTokenizer()
+
+        doc_tokens = []
+
+        for doc in docs:
+            tokens = sorted(tokenizer.tokenize(doc.lower()))
+            doc_tokens.append([e for e in tokens if e not in self.stop_words])
+
+        print(f"{doc_tokens = }")
+        print(f"{len(doc_tokens) = }")
+
+        all_tokens = sum(doc_tokens, [])
+        print(f"{len(all_tokens) = }")
+
+        lexicon = sorted(set(all_tokens))
+        print(f"{lexicon = }")
+        print(f"{len(lexicon) = }")
+
+        # Vectorize
+        zeros = OrderedDict((token, 0) for token in lexicon)
+        doc_vec = []
+        for token_list in doc_tokens:
+            vec = copy.copy(zeros)
+            token_count = Counter(token_list)
+            for key, value in token_count.items():
+                vec[key] = value / len(lexicon)
+            doc_vec.append(vec)
+
+        print(f"{len(doc_vec)}")
+        print(f"{doc_vec[0]}")
 
     def analize(self, sentences: str):
-        sentences = self.strip_pontuation(sentences).lower()
+        # sentences = self.strip_pontuation(sentences).lower()
 
-        onehot_df = self.tolkenizator(sentences)
-        print(f"{onehot_df = }")
+        tokens = self.nltk_to1kenize(sentences)
 
-        bow_df = self.bow(sentences)
-        print(f"{bow_df.columns = }")
-        print(f"{bow_df = }")
+        # removing stopwords
+        tokens = [e for e in tokens if e not in self.stop_words]
 
-        tokens = self.do_ngrams(
-            self.casual_token(sentences, reduce_len=True, strip_handles=True)
-        )
-        print(f"{tokens = }")
+        bag_of_words = Counter(tokens)  # type: ignore
+        print(f"{bag_of_words.most_common(15) = }")
 
-        bow_df_ngrams = self.bow(sentences, 2)
+        print(f"{self.tf(bag_of_words, 'amor')}")
 
-        print(f"{self.scalar_prod(bow_df_ngrams) = }")
-        print(f"{self.scalar_prod(bow_df) = }")
+        # onehot_df = self.tolkenizator(sentences)
+        # print(f"{onehot_df = }")
 
-        self.scalar_matrix(bow_df)
+        # bow_df = self.bow(sentences)
+        # print(f"{bow_df.columns = }")
+        # print(f"{bow_df = }")
 
-        tokens_scy, doc = self.grammatic(sentences)
-        tokens_lemma = self.lemma(tokens_scy)
-        ent = self.entities(doc)
+        # tokens = self.do_ngrams(
+        #     self.casual_token(sentences, reduce_len=True, strip_handles=True)
+        # )
+        # print(f"{tokens = }")
 
-        print(f"{tokens_lemma = }")
-        print(f"{ent = }")
+        # bow_df_ngrams = self.bow(sentences, 2)
 
-        return bow_df
+        # print(f"{self.scalar_prod(bow_df_ngrams) = }")
+        # print(f"{self.scalar_prod(bow_df) = }")
+
+        # self.scalar_matrix(bow_df)
+
+        # tokens_scy, doc = self.grammatic(sentences)
+        # tokens_lemma = self.lemma(tokens_scy)
+        # ent = self.entities(doc)
+
+        # print(f"{tokens_lemma = }")
+        # print(f"{ent = }")
 
     def tolkenizator(self, sentence: str, remove_stop_words: bool = True) -> pd.DataFrame:
         token_sentence = str.split(sentence)
@@ -67,6 +112,11 @@ class NLP:
             onehot_vectors[i, vocab.index(word)] = 1
 
         return pd.DataFrame(onehot_vectors, columns=vocab)
+
+    def nltk_to1kenize(self, sentence: str) -> List[str]:
+        tokenizer = TreebankWordTokenizer()
+
+        return tokenizer.tokenize(sentence.lower())
 
     def bow(self, sentence: str, ngrams: int = None) -> pd.DataFrame:
         """Bag of Words"""
@@ -89,8 +139,12 @@ class NLP:
 
         return pd.DataFrame.from_records(corpus).fillna(0).astype(int).T
 
+    def tf(self, bag: Dict[str, int], word: str) -> float:
+        """Return the term freaquency of a word in a bag_of_words."""
+        return round(bag[word] / len(bag), 4)
+
     def grammatic(self, sentence: str) -> Tuple[Any, Any]:
-        doc = self.scy(sentence)
+        doc = self.spacy_mode_pt(sentence)
 
         return [token for token in doc], doc
 
@@ -140,4 +194,7 @@ if __name__ == "__main__":
     sentence = "\n".join(df.loc[df["category"] == "Poesias › Amor"]["text"].to_list())
 
     nlp = NLP()
-    bow_df = nlp.analize(sentence)
+    # nlp.analize(sentence)
+
+    sentences_list = df.loc[df["category"] == "Poesias › Amor"]["text"].to_list()
+    nlp.vectorize_many(sentences_list)
